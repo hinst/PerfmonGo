@@ -1,0 +1,1 @@
+rsync -a -e "ssh -p 9003" /cygdrive/C/Dev/PerfmonGo/ hinst@hinst.ru:/home/hinst/App/PermonGo
