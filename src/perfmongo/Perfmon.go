@@ -8,6 +8,7 @@ import (
 
 type TPerfmon struct {
 	Interval int
+	thread   TCycleThread
 }
 
 func (this *TPerfmon) ReadSystem() []TCpuUsageCore {
@@ -33,4 +34,11 @@ func (this *TPerfmon) ReadSystem() []TCpuUsageCore {
 		}
 	}
 	return result
+}
+
+func (this *TPerfmon) Start() {
+
+}
+
+func (this *TPerfmon) execute() {
 }
