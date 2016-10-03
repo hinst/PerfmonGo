@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type TPerfmon struct {
@@ -37,7 +38,9 @@ func (this *TPerfmon) ReadSystem() []TCpuUsageCore {
 }
 
 func (this *TPerfmon) Start() {
-
+	this.thread.Interval = time.Second * 2
+	this.thread.Function = this.execute
+	this.thread.Start()
 }
 
 func (this *TPerfmon) execute() {

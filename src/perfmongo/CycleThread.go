@@ -42,7 +42,6 @@ func (this *TCycleThread) run() {
 			this.active = false
 		}
 	}
-	GlobalLog.Write("exiting")
 }
 
 // Stop and wait
