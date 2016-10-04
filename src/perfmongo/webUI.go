@@ -3,6 +3,7 @@ package perfmongo
 //response http.ResponseWriter, request *http.Request
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -48,12 +49,14 @@ func (this *TWebUI) CheckStrictPageName(pageName string) bool {
 func (this *TWebUI) HandlePageRequest(response http.ResponseWriter, request *http.Request) {
 	var pageName = request.URL.Query().Get("name")
 	if this.CheckStrictPageName(pageName) {
-		var page, pageResult = ioutil.ReadFile(AppDirectory + "/src/page/" + pageName + ".html")
+		var page, pageResult = GetAsset("src/page/" + pageName + ".html")
 		if pageResult == nil {
 			var layout = this.ReadLayout()
 			var content = strings.Replace(string(layout), "$body", string(page), -1)
 			content = strings.Replace(content, "$appURL", this.AppURL, -1)
 			response.Write([]byte(content))
+		} else {
+			fmt.Println("Error: could not load page '" + pageName + "' " + pageResult.Error())
 		}
 	}
 }

@@ -1,0 +1,1 @@
+go-bindata -o src/perfmongo_app/resources.go src/page
