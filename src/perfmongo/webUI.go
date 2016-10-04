@@ -39,7 +39,9 @@ func (this *TWebUI) HandlePageRequest(response http.ResponseWriter, request *htt
 		content = strings.Replace(content, "$appURL", this.AppURL, -1)
 		response.Write([]byte(content))
 	} else {
-		fmt.Println("Error: could not load page '" + pageName + "'")
+		if false {
+			fmt.Println("Error: could not load page '" + pageName + "'")
+		}
 	}
 }
 
