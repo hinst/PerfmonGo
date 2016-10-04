@@ -1,5 +1,8 @@
 package perfmongo
 
+import "time"
+
 type TCpuUsageInfo struct {
-	Total float32
+	Moment time.Time
+	Total  float64
 }

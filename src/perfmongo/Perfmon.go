@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -13,6 +14,8 @@ type TPerfmon struct {
 	Interval     int
 	Last         TCpuUsageCores
 	thread       TCycleThread
+	DataLocker   sync.RWMutex
+	Data         []TCpuUsageInfo
 }
 
 func (this *TPerfmon) ReadSystem() TCpuUsageCores {
@@ -57,7 +60,34 @@ func (this *TPerfmon) execute() {
 	var diff = current.Clone()
 	diff.Substract(this.Last)
 	this.Last = current
-	var utilization = diff[0].GetUtilization()
-	fmt.Printf("%v %v\n", diff[0].Total, diff[0].Idle)
-	fmt.Println(strconv.FormatFloat(utilization, 'f', 2, 64))
+	var totalUtilization = diff[0].GetUtilization()
+	if false {
+		fmt.Printf("%v %v\n", diff[0].Total, diff[0].Idle)
+		fmt.Println(strconv.FormatFloat(totalUtilization, 'f', 2, 64))
+	}
+	var data TCpuUsageInfo
+	data.Moment = time.Now()
+	data.Total = totalUtilization
+	this.DataLocker.Lock()
+	defer this.DataLocker.Unlock()
+	this.AddData(data)
+	this.ReduceData()
+}
+
+func (this *TPerfmon) AddData(info TCpuUsageInfo) {
+	this.Data = append(this.Data, info)
+}
+
+func (this *TPerfmon) GetDataLengthLimit() int {
+	return 10000
+}
+
+func (this *TPerfmon) GetDataLengthToCut() int {
+	return 1000
+}
+
+func (this *TPerfmon) ReduceData() {
+	if len(this.Data) > this.GetDataLengthLimit() {
+		this.Data = this.Data[this.GetDataLengthToCut():]
+	}
 }

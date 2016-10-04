@@ -6,16 +6,15 @@ import (
 	"sync"
 )
 
-var perfmon perfmongo.TPerfmon
+var app perfmongo.TApp
 var holder sync.WaitGroup
 
 func main() {
 	fmt.Println("STARTING...")
 	holder.Add(1)
-	perfmon.CountOfCores = 8
-	perfmon.Start()
+	app.Start()
 	perfmongo.InstallShutdownReceiver(func() {
-		perfmon.Stop()
+		app.Stop()
 		holder.Done()
 	})
 	holder.Wait()
