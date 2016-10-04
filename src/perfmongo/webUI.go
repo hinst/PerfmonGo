@@ -30,21 +30,6 @@ func (this *TWebUI) ReadLayout() []byte {
 	return content
 }
 
-func (this *TWebUI) CheckStrictPageName(pageName string) bool {
-	var result = len(pageName) > 0
-	if result {
-		var letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		for _, c := range pageName {
-			var acceptable = strings.ContainsRune(letters, c)
-			if false == acceptable {
-				result = false
-				break
-			}
-		}
-	}
-	return result
-}
-
 func (this *TWebUI) HandlePageRequest(response http.ResponseWriter, request *http.Request) {
 	var pageName = request.URL.Query().Get("name")
 	var page = GetCachedAsset("src/page/" + pageName + ".html")
