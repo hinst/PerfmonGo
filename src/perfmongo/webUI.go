@@ -18,6 +18,7 @@ type TWebUI struct {
 func (this *TWebUI) Start() {
 	this.AppURL = "/PerfmonGo"
 	this.AddRequestHandler("/page", this.HandlePageRequest)
+	this.InstallFileHandler("third/web")
 	go http.ListenAndServe(":9001", nil)
 }
 
@@ -55,4 +56,12 @@ func (this *TWebUI) WrapRequestHandler(f func(response http.ResponseWriter, requ
 
 func (this *TWebUI) AddRequestHandler(subUrl string, f func(response http.ResponseWriter, request *http.Request)) {
 	http.HandleFunc(this.AppURL+subUrl, this.WrapRequestHandler(f))
+}
+
+func (this *TWebUI) InstallFileHandler(folderName string) {
+	var url = this.AppURL + "/" + folderName + "/"
+	var directoryPath = AppDirectory + "/" + folderName
+	var fileDirectory = http.Dir(directoryPath)
+	var fileServerHandler = http.FileServer(fileDirectory)
+	http.Handle(url, http.StripPrefix(url, fileServerHandler))
 }
