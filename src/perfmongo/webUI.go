@@ -4,7 +4,6 @@ package perfmongo
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"sync"
@@ -27,7 +26,7 @@ func (this *TWebUI) Stop() {
 }
 
 func (this *TWebUI) ReadLayout() []byte {
-	var content, _ = ioutil.ReadFile(AppDirectory + "/src/page/layout.html")
+	var content = GetCachedAsset("src/page/layout.html")
 	return content
 }
 
@@ -48,16 +47,14 @@ func (this *TWebUI) CheckStrictPageName(pageName string) bool {
 
 func (this *TWebUI) HandlePageRequest(response http.ResponseWriter, request *http.Request) {
 	var pageName = request.URL.Query().Get("name")
-	if this.CheckStrictPageName(pageName) {
-		var page, pageResult = GetAsset("src/page/" + pageName + ".html")
-		if pageResult == nil {
-			var layout = this.ReadLayout()
-			var content = strings.Replace(string(layout), "$body", string(page), -1)
-			content = strings.Replace(content, "$appURL", this.AppURL, -1)
-			response.Write([]byte(content))
-		} else {
-			fmt.Println("Error: could not load page '" + pageName + "' " + pageResult.Error())
-		}
+	var page = GetCachedAsset("src/page/" + pageName + ".html")
+	if page != nil {
+		var layout = this.ReadLayout()
+		var content = strings.Replace(string(layout), "$body", string(page), -1)
+		content = strings.Replace(content, "$appURL", this.AppURL, -1)
+		response.Write([]byte(content))
+	} else {
+		fmt.Println("Error: could not load page '" + pageName + "'")
 	}
 }
 
