@@ -1,0 +1,1 @@
+go build perfmongo_app && ./perfmongo_app
