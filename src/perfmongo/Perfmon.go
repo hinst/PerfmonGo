@@ -20,7 +20,7 @@ type TPerfmon struct {
 
 func (this *TPerfmon) ReadSystem() TCpuUsageCores {
 	var text, readFileResult = ioutil.ReadFile("/proc/stat")
-	var result TCpuUsageCores = make(TCpuUsageCores, 8)
+	var result TCpuUsageCores = make(TCpuUsageCores, this.CountOfCores+1)
 	var resultIndex = 0
 	if readFileResult == nil {
 		var lines = strings.Split(string(text), "\n")

@@ -73,6 +73,6 @@ func (this *TWebUI) GetLatest(ctx *fasthttp.RequestCtx) {
 	if seconds > 0 {
 		this.Perfmon.DataLocker.RLock()
 		defer this.Perfmon.DataLocker.RUnlock()
-		var data = this.Perfmon.Data.GetLatest(time.Second * seconds)
+		var data = this.Perfmon.Data.GetLatest(time.Second * time.Duration(seconds))
 	}
 }
