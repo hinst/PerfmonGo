@@ -15,7 +15,7 @@ type TPerfmon struct {
 	Last         TCpuUsageCores
 	thread       TCycleThread
 	DataLocker   sync.RWMutex
-	Data         []TCpuUsageInfo
+	Data         TCpuUsageInfos
 }
 
 func (this *TPerfmon) ReadSystem() TCpuUsageCores {
@@ -88,6 +88,6 @@ func (this *TPerfmon) GetDataLengthToCut() int {
 
 func (this *TPerfmon) ReduceData() {
 	if len(this.Data) > this.GetDataLengthLimit() {
-		this.Data = this.Data[this.GetDataLengthToCut():]
+		this.Data = this.Data[this.GetDataLengthToCut():].Clone()
 	}
 }

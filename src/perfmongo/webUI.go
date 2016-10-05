@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/valyala/fasthttp"
 )
@@ -64,5 +65,14 @@ func (this *TWebUI) HandlePageRequest(ctx *fasthttp.RequestCtx) {
 		if false {
 			fmt.Println("Error: could not load page '" + pageName + "'")
 		}
+	}
+}
+
+func (this *TWebUI) GetLatest(ctx *fasthttp.RequestCtx) {
+	var seconds = ctx.URI().QueryArgs().GetUintOrZero("seconds")
+	if seconds > 0 {
+		this.Perfmon.DataLocker.RLock()
+		defer this.Perfmon.DataLocker.RUnlock()
+		var data = this.Perfmon.Data.GetLatest(time.Second * seconds)
 	}
 }
