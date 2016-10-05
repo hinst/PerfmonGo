@@ -37,6 +37,8 @@ func (this *TWebUI) ProcessRequest(ctx *fasthttp.RequestCtx) {
 		this.ThirdWebHandler(ctx)
 	case bytes.Equal(path, this.PagePath):
 		this.HandlePageRequest(ctx)
+	default:
+		ctx.SetBodyString("Not found")
 	}
 }
 
