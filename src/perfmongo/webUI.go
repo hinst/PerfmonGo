@@ -3,23 +3,41 @@ package perfmongo
 //response http.ResponseWriter, request *http.Request
 
 import (
+	"bytes"
 	"fmt"
-	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/valyala/fasthttp"
 )
 
 type TWebUI struct {
-	AppURL        string
-	RequestHolder sync.WaitGroup
-	Perfmon       TPerfmon
+	AppURL          string
+	RequestHolder   sync.WaitGroup
+	Perfmon         TPerfmon
+	ThirdWebPrefix  []byte
+	ThirdWebHandler fasthttp.RequestHandler
+	PagePath        []byte
 }
 
 func (this *TWebUI) Start() {
 	this.AppURL = "/PerfmonGo"
-	this.AddRequestHandler("/page", this.HandlePageRequest)
-	this.InstallFileHandler("third/web")
-	go http.ListenAndServe(":9001", nil)
+	this.ThirdWebPrefix = []byte(this.AppURL + "/third/web")
+	this.ThirdWebHandler = fasthttp.FSHandler(AppDirectory, 1)
+	this.PagePath = []byte(this.AppURL + "/page")
+	fasthttp.ListenAndServe(":9001", this.ProcessRequest)
+}
+
+func (this *TWebUI) ProcessRequest(ctx *fasthttp.RequestCtx) {
+	this.RequestHolder.Add(1)
+	defer this.RequestHolder.Done()
+	var path = ctx.Path()
+	switch {
+	case bytes.HasPrefix(path, this.ThirdWebPrefix):
+		this.ThirdWebHandler(ctx)
+	case bytes.Equal(path, this.PagePath):
+		this.HandlePageRequest(ctx)
+	}
 }
 
 func (this *TWebUI) Stop() {
@@ -31,37 +49,18 @@ func (this *TWebUI) ReadLayout() []byte {
 	return content
 }
 
-func (this *TWebUI) HandlePageRequest(response http.ResponseWriter, request *http.Request) {
-	var pageName = request.URL.Query().Get("name")
+func (this *TWebUI) HandlePageRequest(ctx *fasthttp.RequestCtx) {
+	var pageName = string(ctx.URI().QueryArgs().Peek("name"))
 	var page = GetCachedAsset("src/page/" + pageName + ".html")
 	if page != nil {
 		var layout = this.ReadLayout()
 		var content = strings.Replace(string(layout), "$body", string(page), -1)
 		content = strings.Replace(content, "$appURL", this.AppURL, -1)
-		response.Write([]byte(content))
+		ctx.Response.Header.Set("Content-Type", "text/html; charset=utf-8")
+		ctx.SetBodyString(content)
 	} else {
 		if false {
 			fmt.Println("Error: could not load page '" + pageName + "'")
 		}
 	}
-}
-
-func (this *TWebUI) WrapRequestHandler(f func(response http.ResponseWriter, request *http.Request)) func(response http.ResponseWriter, request *http.Request) {
-	return func(response http.ResponseWriter, request *http.Request) {
-		this.RequestHolder.Add(1)
-		f(response, request)
-		this.RequestHolder.Done()
-	}
-}
-
-func (this *TWebUI) AddRequestHandler(subUrl string, f func(response http.ResponseWriter, request *http.Request)) {
-	http.HandleFunc(this.AppURL+subUrl, this.WrapRequestHandler(f))
-}
-
-func (this *TWebUI) InstallFileHandler(folderName string) {
-	var url = this.AppURL + "/" + folderName + "/"
-	var directoryPath = AppDirectory + "/" + folderName
-	var fileDirectory = http.Dir(directoryPath)
-	var fileServerHandler = http.FileServer(fileDirectory)
-	http.Handle(url, http.StripPrefix(url, fileServerHandler))
 }
