@@ -15,18 +15,25 @@ import (
 type TWebUI struct {
 	AppURL          string
 	RequestHolder   sync.WaitGroup
-	Perfmon         TPerfmon
+	Perfmon         *TPerfmon
 	ThirdWebPrefix  []byte
+	PagePrefix      []byte
 	ThirdWebHandler fasthttp.RequestHandler
 	PagePath        []byte
+	PageSrcPrefix   []byte
+	PageFiler       fasthttp.RequestHandler
+	LatestCpuPath   []byte
 }
 
 func (this *TWebUI) Start() {
 	this.AppURL = "/PerfmonGo"
 	this.ThirdWebPrefix = []byte(this.AppURL + "/third/web")
-	this.ThirdWebHandler = fasthttp.FSHandler(AppDirectory, 1)
+	this.ThirdWebHandler = fasthttp.FSHandler(AppDirectory+"/third/web", 3)
 	this.PagePath = []byte(this.AppURL + "/page")
-	fasthttp.ListenAndServe(":9001", this.ProcessRequest)
+	this.PageSrcPrefix = []byte(this.AppURL + "/src/page")
+	this.PageFiler = fasthttp.FSHandler(AppDirectory+"/src/page", 3)
+	this.LatestCpuPath = []byte(this.AppURL + "/latestCPU")
+	go fasthttp.ListenAndServe(":9001", this.ProcessRequest)
 }
 
 func (this *TWebUI) ProcessRequest(ctx *fasthttp.RequestCtx) {
@@ -36,8 +43,12 @@ func (this *TWebUI) ProcessRequest(ctx *fasthttp.RequestCtx) {
 	switch {
 	case bytes.HasPrefix(path, this.ThirdWebPrefix):
 		this.ThirdWebHandler(ctx)
+	case bytes.HasPrefix(path, this.PageSrcPrefix):
+		this.PageFiler(ctx)
 	case bytes.Equal(path, this.PagePath):
 		this.HandlePageRequest(ctx)
+	case bytes.HasPrefix(path, this.LatestCpuPath):
+		this.GetLatest(ctx)
 	default:
 		ctx.SetBodyString("Not found")
 	}
@@ -71,8 +82,11 @@ func (this *TWebUI) HandlePageRequest(ctx *fasthttp.RequestCtx) {
 func (this *TWebUI) GetLatest(ctx *fasthttp.RequestCtx) {
 	var seconds = ctx.URI().QueryArgs().GetUintOrZero("seconds")
 	if seconds > 0 {
+		var duration = time.Second * time.Duration(seconds)
 		this.Perfmon.DataLocker.RLock()
 		defer this.Perfmon.DataLocker.RUnlock()
-		var data = this.Perfmon.Data.GetLatest(time.Second * time.Duration(seconds))
+		var latestData = this.Perfmon.Data.GetLatest(duration)
+		var plotlyData = latestData.ToPlotlyJson()
+		ctx.Response.SetBody(plotlyData)
 	}
 }

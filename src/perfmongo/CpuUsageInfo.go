@@ -2,6 +2,7 @@ package perfmongo
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -12,8 +13,8 @@ type TCpuUsageInfo struct {
 }
 
 type TPlotlyData struct {
-	x []string
-	y []float64
+	X []string  `json:"x"`
+	Y []float64 `json:"y"`
 }
 
 type TCpuUsageInfos []TCpuUsageInfo
@@ -25,10 +26,12 @@ func (this TCpuUsageInfos) Clone() TCpuUsageInfos {
 }
 
 func (this TCpuUsageInfos) GetLatest(duration time.Duration) TCpuUsageInfos {
+	fmt.Println(len(this))
 	var result TCpuUsageInfos
 	var now = time.Now()
 	for _, item := range this {
 		if now.Sub(item.Moment) < duration {
+			fmt.Println("+")
 			result = append(result, item)
 		}
 	}
@@ -48,8 +51,8 @@ func (this TCpuUsageInfo) MomentToPlotlyString() string {
 func (this TCpuUsageInfos) ToPlotlyJson() []byte {
 	var dataObject TPlotlyData
 	for _, item := range this {
-		dataObject.x = append(dataObject.x, item.MomentToPlotlyString())
-		dataObject.y = append(dataObject.y, item.Total)
+		dataObject.X = append(dataObject.X, item.MomentToPlotlyString())
+		dataObject.Y = append(dataObject.Y, item.Total)
 	}
 	var data, _ = json.Marshal(dataObject)
 	return data

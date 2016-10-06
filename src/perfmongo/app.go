@@ -16,6 +16,7 @@ type TApp struct {
 func (this *TApp) Start() {
 	this.Perfmon.CountOfCores = 8
 	this.Perfmon.Start()
+	this.Web.Perfmon = &this.Perfmon
 	this.Web.Start()
 }
 

@@ -15,6 +15,7 @@ func main() {
 	holder.Add(1)
 	app.Start()
 	perfmongo.InstallShutdownReceiver(func() {
+		fmt.Println("Stop signal received")
 		app.Stop()
 		holder.Done()
 	})
