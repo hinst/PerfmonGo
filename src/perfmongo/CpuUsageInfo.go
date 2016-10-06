@@ -2,7 +2,6 @@ package perfmongo
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -26,12 +25,10 @@ func (this TCpuUsageInfos) Clone() TCpuUsageInfos {
 }
 
 func (this TCpuUsageInfos) GetLatest(duration time.Duration) TCpuUsageInfos {
-	fmt.Println(len(this))
 	var result TCpuUsageInfos
 	var now = time.Now()
 	for _, item := range this {
 		if now.Sub(item.Moment) < duration {
-			fmt.Println("+")
 			result = append(result, item)
 		}
 	}
