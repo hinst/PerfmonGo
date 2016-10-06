@@ -9,11 +9,14 @@ import (
 type TCpuUsageInfo struct {
 	Moment time.Time
 	Total  float64
+	Cores  []float64
 }
 
 type TPlotlyData struct {
 	X []string  `json:"x"`
 	Y []float64 `json:"y"`
+
+	UnixNow int64
 }
 
 type TCpuUsageInfos []TCpuUsageInfo
@@ -47,10 +50,13 @@ func (this TCpuUsageInfo) MomentToPlotlyString() string {
 
 func (this TCpuUsageInfos) ToPlotlyJson() []byte {
 	var dataObject TPlotlyData
+	var lastMoment = time.Now()
 	for _, item := range this {
 		dataObject.X = append(dataObject.X, item.MomentToPlotlyString())
-		dataObject.Y = append(dataObject.Y, item.Total)
+		dataObject.Y = append(dataObject.Y, item.Total*100)
+		lastMoment = item.Moment
 	}
+	dataObject.UnixNow = lastMoment.Unix()
 	var data, _ = json.Marshal(dataObject)
 	return data
 }
