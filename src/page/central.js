@@ -8,7 +8,7 @@ var receiveData = function(data) {
 			bargap: 0,
 			margin: {
 				l: 30,
-				r: 0,
+				r: 30,
 				t: 8,
 				b: 40
 			},
