@@ -31,7 +31,12 @@ var receiveData = function(data) {
 	);
 }
 var requestData = function() {
-	$.get(appURL + "/latestCPU", {seconds: 60}, receiveData, "json");	
+	var url = "";
+	var args = {seconds: 60};
+	if (coresMode) {
+		args.cores = 1;
+	}
+	$.get(appURL + "/latestCPU", args, receiveData, "json");	
 }
 requestData();
 setInterval(requestData, 2000);

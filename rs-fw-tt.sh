@@ -1,1 +1,1 @@
-rsync -av -e "ssh -p 9003" /cygdrive/C/Dev/PerfmonGo/ hinst@hinst.ru:/home/hinst/App/PerfmonGo
+rsync -av --delete -e "ssh -p 9003" /cygdrive/C/Dev/PerfmonGo/ hinst@hinst.ru:/home/hinst/App/PerfmonGo
