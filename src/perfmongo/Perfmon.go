@@ -57,8 +57,7 @@ func (this *TPerfmon) Stop() {
 
 func (this *TPerfmon) execute() {
 	var current = this.ReadSystem()
-	var diff = current.Clone()
-	diff.Substract(this.Last)
+	var diff = current.Substract(this.Last)
 	this.Last = current
 	var totalUtilization = diff[0].GetUtilization()
 	if false {
@@ -67,7 +66,7 @@ func (this *TPerfmon) execute() {
 	}
 	var data TCpuUsageInfo
 	data.Moment = time.Now()
-	data.Total = totalUtilization
+	data.LoadFromDiff(diff)
 	this.DataLocker.Lock()
 	defer this.DataLocker.Unlock()
 	this.AddData(data)
@@ -75,7 +74,7 @@ func (this *TPerfmon) execute() {
 }
 
 func (this *TPerfmon) AddData(info TCpuUsageInfo) {
-	this.Data = append(this.Data, info)
+	this.Data = append(this.Data, &info)
 }
 
 func (this *TPerfmon) GetDataLengthLimit() int {

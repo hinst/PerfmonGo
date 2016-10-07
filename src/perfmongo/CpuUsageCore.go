@@ -12,13 +12,15 @@ func (this *TCpuUsageCore) Substract(b TCpuUsageCore) {
 	this.Idle -= b.Idle
 }
 
-func (this TCpuUsageCores) Substract(b TCpuUsageCores) {
-	for i := range this {
+func (this TCpuUsageCores) Substract(b TCpuUsageCores) TCpuUsageCores {
+	var result = this.Clone()
+	for i := range result {
 		if i >= len(b) {
 			break
 		}
-		this[i].Substract(b[i])
+		result[i].Substract(b[i])
 	}
+	return result
 }
 
 func (this TCpuUsageCores) Clone() TCpuUsageCores {

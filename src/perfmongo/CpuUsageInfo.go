@@ -19,7 +19,7 @@ type TPlotlyData struct {
 	UnixNow int64
 }
 
-type TCpuUsageInfos []TCpuUsageInfo
+type TCpuUsageInfos []*TCpuUsageInfo
 
 func (this TCpuUsageInfos) Clone() TCpuUsageInfos {
 	var result = make(TCpuUsageInfos, len(this))
@@ -59,4 +59,15 @@ func (this TCpuUsageInfos) ToPlotlyJson() []byte {
 	dataObject.UnixNow = lastMoment.Unix()
 	var data, _ = json.Marshal(dataObject)
 	return data
+}
+
+func (this *TCpuUsageInfo) LoadFromDiff(diff TCpuUsageCores) {
+	if len(diff) > 0 {
+		this.Total = diff[0].GetUtilization()
+		diff = diff[1:]
+		this.Cores = make([]float64, len(diff))
+		for i, item := range diff {
+			this.Cores[i] = item.GetUtilization()
+		}
+	}
 }
