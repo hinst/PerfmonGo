@@ -1,9 +1,10 @@
 var receiveData = function(data) {
 	console.log("r");
-	data.type = "bar";
+	for (var i = 0; i < data.Series.length; i++)
+		data.Series[i].type = "bar";
 	var lastMoment = data.UnixNow * 1000;
 	data.UnixNow = undefined;
-	Plotly.newPlot("graph", [data], 
+	Plotly.newPlot("graph", data.Series, 
 		{
 			bargap: 0,
 			margin: {

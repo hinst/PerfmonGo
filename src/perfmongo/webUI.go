@@ -81,12 +81,18 @@ func (this *TWebUI) HandlePageRequest(ctx *fasthttp.RequestCtx) {
 
 func (this *TWebUI) GetLatest(ctx *fasthttp.RequestCtx) {
 	var seconds = ctx.URI().QueryArgs().GetUintOrZero("seconds")
+	var cores = ctx.URI().QueryArgs().GetUintOrZero("cores")
 	if seconds > 0 {
 		var duration = time.Second * time.Duration(seconds)
 		this.Perfmon.DataLocker.RLock()
 		defer this.Perfmon.DataLocker.RUnlock()
 		var latestData = this.Perfmon.Data.GetLatest(duration)
-		var plotlyData = latestData.ToPlotlyJson()
+		var plotlyData []byte
+		if cores > 0 {
+			plotlyData = latestData.ToPlotlyCoresJson()
+		} else {
+			plotlyData = latestData.ToPlotlyJson()
+		}
 		ctx.Response.SetBody(plotlyData)
 	}
 }
