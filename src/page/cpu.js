@@ -1,3 +1,9 @@
+/// <reference path="common.js"/>
+var coresMode = false;
+if (perfmonGoApp.getURLArgument("cores") == "y") {
+	coresMode = true;
+};
+
 var receiveData = function(data) {
 	console.log("r");
 	for (var i = 0; i < data.Series.length; i++)
@@ -29,3 +35,4 @@ var requestData = function() {
 }
 requestData();
 setInterval(requestData, 2000);
+
