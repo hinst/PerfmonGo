@@ -87,11 +87,12 @@ func (this TCpuUsageInfos) GetCountOfCores() int {
 
 func (this TCpuUsageInfos) ToPlotlyCoresJson() []byte {
 	var dataObject TPlotlyData
-	var lines = make([]TPlotlyLine, this.GetCountOfCores())
+	var countOfCores = this.GetCountOfCores()
+	var lines = make([]TPlotlyLine, countOfCores)
 	for _, item := range this {
 		for coreIndex, core := range item.Cores {
 			lines[coreIndex].X = append(lines[coreIndex].X, item.MomentToPlotlyString())
-			lines[coreIndex].Y = append(lines[coreIndex].Y, core)
+			lines[coreIndex].Y = append(lines[coreIndex].Y, core*100/float64(countOfCores))
 		}
 	}
 	dataObject.Series = lines

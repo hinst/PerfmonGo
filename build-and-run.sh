@@ -1,4 +1,5 @@
 dir=$(pwd)
+export GOPATH=$dir
 if [ ! -f go-bindata ]
 then
 	go build github.com/jteeuwen/go-bindata/go-bindata

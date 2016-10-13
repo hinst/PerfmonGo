@@ -9,24 +9,26 @@ var receiveData = function(data) {
 		data.Series[i].type = "bar";
 	var lastMoment = data.UnixNow * 1000;
 	data.UnixNow = undefined;
-	Plotly.newPlot("graph", data.Series, 
-		{
-			bargap: 0,
-			margin: {
-				l: 30,
-				r: 30,
-				t: 8,
-				b: 40
-			},
-			xaxis: {
-				type: "date",
-				range: [lastMoment - timeInterval * 1000, lastMoment]
-			},
-			yaxis: {
-				range: [0, 100]
-			}
+	var plotSettings = {
+		bargap: 0,
+		barmode: "stack",
+		showlegend: false,
+		hovermode: false,
+		margin: {
+			l: 30,
+			r: 30,
+			t: 8,
+			b: 40
+		},
+		xaxis: {
+			type: "date",
+			range: [lastMoment - timeInterval * 1000, lastMoment]
+		},
+		yaxis: {
+			range: [0, 100]
 		}
-	);
+	};
+	Plotly.newPlot("graph", data.Series, plotSettings);
 };
 var requestData = function() {
 	var url = "";
@@ -52,4 +54,16 @@ if (chosenTimeIntervalButtonId == null)
 var chosenTimeIntervalButton = document.getElementById(chosenTimeIntervalButtonId);
 if (chosenTimeIntervalButton != null)
 	chosenTimeIntervalButton.click();
+var coresButton = $("#coresButton");
+var updateCoresButtonStatus = function() {
+	if (coresMode)
+		coresButton.addClass("bold");
+	else
+		coresButton.removeClass("bold");
+};
+var toggleCoresMode = function() {
+	coresMode = !coresMode;
+	updateCoresButtonStatus();
+};
+coresButton.on("click", toggleCoresMode);
 requestData();
