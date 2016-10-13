@@ -1,11 +1,10 @@
 /// <reference path="common.js"/>
+var timeInterval = 60; // seconds
 var coresMode = false;
 if (perfmonGoApp.getURLArgument("cores") == "y") {
 	coresMode = true;
 };
-
 var receiveData = function(data) {
-	console.log("r");
 	for (var i = 0; i < data.Series.length; i++)
 		data.Series[i].type = "bar";
 	var lastMoment = data.UnixNow * 1000;
@@ -21,23 +20,36 @@ var receiveData = function(data) {
 			},
 			xaxis: {
 				type: "date",
-				//range: [lastMoment - 60 * 1000, lastMoment]
-				range: [lastMoment - 60 * 1000, lastMoment]
+				range: [lastMoment - timeInterval * 1000, lastMoment]
 			},
 			yaxis: {
 				range: [0, 100]
 			}
 		}
 	);
-}
+};
 var requestData = function() {
 	var url = "";
-	var args = {seconds: 60};
+	var args = {seconds: timeInterval};
 	if (coresMode) {
 		args.cores = 1;
 	}
 	$.get(appURL + "/latestCPU", args, receiveData, "json");	
 }
-requestData();
 setInterval(requestData, 2000);
-
+var toggleTimeInterval = function(newTimeInterval, button) {
+	$("#intervalTogglePanel").find("[data-group='button']").removeClass("bold");
+	button.addClass("bold");
+	timeInterval = newTimeInterval;
+	var buttonId = button.attr("id")
+	localStorage.setItem("chosenTimeIntervalButtonId", buttonId);
+}
+$("#button1m").on("click", function() { toggleTimeInterval(60, $("#button1m")); } );
+$("#button5m").on("click", function() { toggleTimeInterval(60 * 5, $("#button5m")); } );
+var chosenTimeIntervalButtonId = localStorage.getItem("chosenTimeIntervalButtonId");
+if (chosenTimeIntervalButtonId == null)
+	chosenTimeIntervalButtonId = "button1m";
+var chosenTimeIntervalButton = document.getElementById(chosenTimeIntervalButtonId);
+if (chosenTimeIntervalButton != null)
+	chosenTimeIntervalButton.click();
+requestData();
