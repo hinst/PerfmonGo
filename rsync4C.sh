@@ -1,0 +1,1 @@
+rsync -av --delete /cygdrive/c/Dev/PerfmonGo/ hinst@10.1.2.45:/home/hinst/App/PerfmonGo
